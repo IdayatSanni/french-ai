@@ -1,16 +1,26 @@
-# This is a sample Python script.
+from fastapi import FastAPI
+from pydantic import BaseModel
+from dotenv import load_dotenv
 
-# Press ⌃F5 to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+load_dotenv()
 
+from app.agents.chat_agent import ChatAgent
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press F9 to toggle the breakpoint.
+app = FastAPI()
 
+chat_agent = ChatAgent()
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+class ChatRequest(BaseModel):
+    message: str
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+    response = chat_agent.respond(request.message)
+
+    return {
+        "response": response
+    }
